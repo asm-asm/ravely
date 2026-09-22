@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>アクセス解析 | Ravelry 日本語検索</title><link rel="stylesheet" href="/styles.css"></head>
+<body><main class="container">
+<a href="/" data-icon="chevron-left">検索ページへ</a><h1 data-icon="users">アクセス解析</h1>
+<p>直近30日・UTC日付の集計。人数ではなく操作回数です。再読み込みや管理者の操作も含みます。</p>
+<form id="login" class="search-box"><input id="token" type="password" placeholder="管理用トークン（ローカルでは空欄可）" aria-label="管理用トークン" autocomplete="off"><button>表示・更新</button></form>
+<p id="message" role="status"></p>
+<section id="totals" class="results" aria-label="合計"></section>
+<h2>よく使われるタグ</h2><ol id="tags"></ol>
+<h2>日別の回数</h2><div style="overflow-x:auto"><table style="width:100%;text-align:left;border-collapse:collapse"><thead><tr><th>日付（UTC）</th><th>ページ表示</th><th>検索</th><th>リンククリック</th></tr></thead><tbody id="days"></tbody></table></div>
+<p class="filter-help">検索は成功した1ページ目のみ。初期のおすすめ表示・ページ送りは含みません。タグはその検索時に選択されていた回数です。DNT/GPCを有効にしているブラウザーは集計しません。広告ブロッカー等で未計測となる場合があります。</p>
+</main><script type="module" src="/admin.js"></script></body></html>

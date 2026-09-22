@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: ravelry-japanese-api
+    runtime: node
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 24
+      - key: RAVELRY_MODE
+        value: live
+      - key: RAVELRY_API_USERNAME
+        sync: false
+      - key: RAVELRY_API_PASSWORD
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: ANALYTICS_ADMIN_TOKEN
+        generateValue: true

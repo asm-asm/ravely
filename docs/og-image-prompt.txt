@@ -1,0 +1,5 @@
+Generation mode: built-in image_gen (GPT image generation)
+Output: public/og.png
+Generated dimensions: 1730 x 909
+
+Use case: ads-marketing. Create one finished raster Open Graph social preview card for a Japanese knitting pattern search web app. Landscape 1200x630 aspect ratio, ideally exactly 1200x630. Sophisticated editorial craft design: ivory #F5F7F2 background, very dark ink #172D2B typography, deep teal #075E54 accent, small warm ochre accent. Left area beautiful large perfectly legible Japanese typography, right area tactile photorealistic balls of deep teal and ivory wool, wooden knitting needles and a folded textured knitted swatch, carefully arranged with soft natural shadows. Generous safe margins 60px. Exact text: small brand line "Ravelry 日本語検索"; large headline on two lines "編みたいものが、" and "きっと見つかる。"; smaller supporting text "日本語・タグでパターン検索"; small bottom label "非公式アプリ". No other text, no official logo, no browser chrome, no watermark. Crisp high contrast, cozy yet modern and clean, restrained composition. Render all text as part of the complete image.

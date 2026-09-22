@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Ravelry 日本語検索</title>
+    <meta name="description" content="編みたいものが、きっと見つかる。日本語・タグでパターン検索。対応言語や価格も確認できます。" />
+    <meta name="theme-color" content="#075e54" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:site_name" content="Ravelry 日本語検索" />
+    <meta property="og:title" content="Ravelry 日本語検索 — 編みたいものが、きっと見つかる。" />
+    <meta property="og:description" content="日本語・タグでパターン検索。編み方や言語、無料の条件で探せる非公式アプリです。" />
+    <meta property="og:image" content="./og.png" />
+    <meta property="og:image:width" content="1730" />
+    <meta property="og:image:height" content="909" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="Ravelry 日本語検索。青緑とアイボリーの毛糸と編み地。" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ravelry 日本語検索" />
+    <meta name="twitter:description" content="日本語・タグでパターン検索。対応言語や価格も確認できます。" />
+    <meta name="twitter:image" content="./og.png" />
+    <!-- PUBLIC_SITE_METADATA -->
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" data-icon="spool" aria-hidden="true"></span>
+          <span>Ravelry 日本語検索</span>
+          <button id="shareSite" class="share-button" type="button" data-icon="share-2">サイトをシェア</button>
+        </div>
+      </header>
+
+      <main class="container">
+        <div class="share-feedback">
+          <p id="shareStatus" role="status" aria-live="polite"></p>
+          <div id="shareFallback" hidden>
+            <label for="shareUrl">このURLを選択してコピーしてください</label>
+            <input id="shareUrl" type="url" readonly />
+          </div>
+        </div>
+        <section class="hero">
+          <p class="eyebrow">手芸・編み物の検索をもっと簡単に</p>
+          <h1>日本語でパターンを見つける</h1>
+          <p class="subtitle">
+            ショール・帽子・靴下などの編み物用語を英語に変換して検索します。
+            タグを選ぶだけでも検索できます。日本語で読めるパターンは、言語タグの「日本語」で探せます。
+          </p>
+
+          <label class="search-label" for="searchInput" data-icon="search">キーワードで探す</label>
+          <form id="searchForm" class="search-box" autocomplete="off">
+            <input
+              id="searchInput"
+              type="search"
+              enterkeyhint="search"
+              placeholder="例: ショール、帽子、ベビー セーター"
+              maxlength="200"
+              aria-label="検索キーワード"
+            />
+            <button type="submit" data-icon="search">検索する</button>
+          </form>
+          <div class="filter-panel">
+            <div class="filter-heading"><h2 data-icon="sliders-horizontal">タグで絞り込む</h2><button type="button" id="clearFilters" class="clear-filters" data-icon="x" disabled>タグをクリア</button></div>
+            <p class="filter-help">各グループから1つずつ選べます。選んだタグをもう一度押すと解除します。</p>
+            <div id="filterGroups"></div>
+            <details class="advanced-filters">
+              <summary><span data-icon="sliders-horizontal">もっと絞り込む</span> <span id="advancedCount"></span></summary>
+              <p class="filter-help">糸の太さ・対象サイズ・編み方の特徴を選べます。糸の太さは海外の分類名です。</p>
+              <div id="advancedFilterGroups"></div>
+            </details>
+          </div>
+        </section>
+
+        <p class="filter-help help-with-icon" data-icon="info">価格は取得時の掲載価格です。購入時の価格・対応言語はRavelryでご確認ください。</p>
+
+        <section class="meta-bar">
+          <span id="resultIcon" class="icon icon-sparkles" aria-hidden="true"></span>
+          <span id="statusText" role="status">よく作られているパターンを読み込み中…</span>
+        </section>
+
+        <section id="results" class="results" aria-live="polite"></section>
+        <nav class="pagination" aria-label="検索結果のページ">
+          <button id="previousPage" type="button" data-icon="chevron-left" disabled>前のページ</button>
+          <button id="nextPage" type="button" data-icon="chevron-right" disabled>次のページ</button>
+        </nav>
+        <p class="subtitle">非公式の検索アプリです。パターンと画像の権利は各権利者に帰属します。</p>
+        <p class="filter-help">改善のため、閲覧・検索・リンククリックの回数と選択されたタグを匿名で集計します。Cookieや利用者IDは使わず、検索語・IPアドレスはこの集計に保存しません。</p>
+      </main>
+    </div>
+
+    <script src="./config.js"></script>
+    <script type="module" src="./app.js"></script>
+    <script type="module" src="./share.js"></script>
+  </body>
+</html>
