@@ -5,6 +5,26 @@
 
 ## 現在の状態
 
+公開先はVercelに変更しました。UI・API・管理画面を同一プロジェクトで配信します。GitHub Pages / Renderの設定も代替構成として残しています。
+
+## Vercelで公開
+
+VercelのネイティブExpress対応を使用します。`server.js` のdefault exportがエントリーポイントです。`vercel.json` に管理画面の同梱と30秒の実行上限を指定しています。
+
+本番環境に以下を設定します。
+
+- `RAVELRY_MODE=live`
+- `RAVELRY_API_USERNAME` / `RAVELRY_API_PASSWORD`（秘密環境変数）
+- `ANALYTICS_ADMIN_TOKEN`（管理画面用の秘密環境変数）
+- `SITE_URL`（公開サイトのHTTPS URL）
+- Vercel MarketplaceでUpstash Redisを接続。`KV_REST_API_URL` / `KV_REST_API_TOKEN` または `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` を使用
+
+`npm run build:vercel` は公開URLに合わせたOGPを静的HTMLへ書き込みます。UIとAPIが同じオリジンのため `API_BASE_URL` とCORSの追加設定は不要です。
+解析はRedisの日別ハッシュへ原子的に加算し、90日で失効します。ストレージ障害時は503を返し、保存成功を装いません。ローカルでは従来のJSONファイルを使用します。Vercel上でRedis未設定の場合も503を返します。ローカルで収集済みのカウンターは自動移行しません。
+
+管理画面は `/admin`。管理トークンを入力して表示します。`.env`・`.vercel`・ローカル解析データはアップロード対象外です。
+GitHub Pagesワークフローは `API_BASE_URL` のリポジトリ変数が設定されている場合のみ実行します。
+
 - UI → `/api/search` → RavelryのBasic認証付き検索、結果変換、ページ送りを実装。
 - GitHub Pages用の静的ファイル生成とGitHub Actions、Render用の設定を追加。
 - 設定済みの認証情報で実APIの検索・詳細取得に成功。カテゴリ・編み方・言語・無料の複合検索とページ送りを確認済みです。
@@ -166,4 +186,4 @@ localhostのURLは外部には共有できません。SNSでのOGP表示はPages
 - 公開したPagesから検索し、APIのCORS設定と通信を確認。
 - CORSはブラウザの読み取り制御であり、APIの認証・利用回数制限ではありません。公開規模に応じてホスト側のアクセス制限やレート制限を設定してください。
 
-この作業ではGitHubへのpush、ホスティングの作成・デプロイは実行していません。
+ソースリポジトリ: https://github.com/asm-asm/ravely

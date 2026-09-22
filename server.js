@@ -7,6 +7,8 @@ import { searchPatterns, normalizeQuery, translateQuery, ApiError } from './src/
 import { mockPatterns } from './src/mock.js';
 import { filterGroups } from './public/filters.js';
 import { analyticsRoutes } from './src/analytics.js';
+import fs from 'node:fs';
+import { siteMetadata } from './scripts/site-metadata.js';
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
 
@@ -70,12 +72,20 @@ export function createApp({ env = process.env, fetchImpl = globalThis.fetch } = 
     }
   });
   app.use('/api', (_req, res) => res.status(404).json({ error: 'APIが見つかりません。' }));
+  const siteUrl = env.SITE_URL || (env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${env.VERCEL_PROJECT_PRODUCTION_URL}` : '');
+  if (siteUrl) {
+    const html = siteMetadata(fs.readFileSync(path.join(directory, 'public/index.html'), 'utf8'), siteUrl);
+    app.get(['/', '/index.html'], (_req, res) => res.type('html').send(html));
+  }
   app.use(express.static(path.join(directory, 'public')));
   return app;
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (!process.env.VERCEL && process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   dotenv.config();
   const port = process.env.PORT || 3000;
   createApp().listen(port, () => console.log(`Ravelry Japanese search: http://localhost:${port}`));
 }
+
+// Vercel's native Express adapter imports this application.
+export default createApp();

@@ -10,6 +10,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
+    if: ${{ vars.API_BASE_URL != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
