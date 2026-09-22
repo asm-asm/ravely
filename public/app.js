@@ -154,7 +154,9 @@ async function search(query, page = 1) {
     const summary = data.featured ? 'よく作られているパターン' : [data.query ? `「${data.query}」` : '', ...labels].filter(Boolean).join(' / ');
     statusEl.textContent = `${data.source === 'mock' ? 'デモデータ / ' : ''}${summary}: ${count} / ${page}ページ${translated}${data.detailsWarning ? ' / 一部の言語・価格を取得できませんでした' : ''}`;
     if (data.items.length) resultsEl.replaceChildren(...data.items.map(createCard));
-    else renderEmpty('該当する結果がありません。別のキーワードでお試しください。');
+    else renderEmpty(Object.keys(filters).length
+      ? 'このキーワードとタグの組み合わせでは結果がありません。「タグをクリア」で条件を外すか、別のキーワードでお試しください。'
+      : '該当する結果がありません。「ショール」や「帽子」など、短いキーワードでお試しください。');
     previous.disabled = page <= 1;
     next.disabled = !data.hasNext;
   } catch (error) {
