@@ -125,7 +125,7 @@ function createCard(item) {
 function renderEmpty(message) {
   resultsEl.replaceChildren(element('div', 'empty-state', message));
 }
-async function search(query, page = 1) {
+async function search(query, page = 1, { scrollToResults = false } = {}) {
   activeRequest?.abort();
   const filters = { ...selectedFilters };
   const featured = !query && !Object.keys(filters).length;
@@ -165,13 +165,20 @@ async function search(query, page = 1) {
     renderEmpty(controller.signal.aborted ? '応答に時間がかかっています。再度検索してください。' : error.message);
   } finally {
     clearTimeout(timeout);
-    if (activeRequest === controller) resultsEl.setAttribute('aria-busy', 'false');
+    if (activeRequest === controller) {
+      resultsEl.setAttribute('aria-busy', 'false');
+      if (scrollToResults) resultsEl.scrollIntoView({
+        block: 'start',
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'
+      });
+    }
   }
 }
 form.addEventListener('submit', event => {
   event.preventDefault();
   const query = input.value.trim();
-  search(query);
+  input.blur();
+  search(query, 1, { scrollToResults: true });
 });
 previous.addEventListener('click', () => search(currentQuery, currentPage - 1));
 next.addEventListener('click', () => search(currentQuery, currentPage + 1));
