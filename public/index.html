@@ -85,6 +85,13 @@
           <button id="previousPage" type="button" data-icon="chevron-left" disabled>前のページ</button>
           <button id="nextPage" type="button" data-icon="chevron-right" disabled>次のページ</button>
         </nav>
+        <section class="recent" aria-labelledby="recentHeading">
+          <h2 id="recentHeading" data-icon="sparkles">Ravelryに新しく登録された編み図</h2>
+          <p id="recentStatus" class="filter-help" role="status"></p>
+          <div id="recentList" class="recent-list" aria-live="polite"></div>
+          <button id="recentMore" class="recent-button" type="button" hidden>もっと見る</button>
+          <p class="filter-help">データ提供：<a href="https://www.ravelry.com/" target="_blank" rel="noopener noreferrer">Ravelry</a></p>
+        </section>
         <p class="subtitle">非公式の検索アプリです。パターンと画像の権利は各権利者に帰属します。</p>
         <p class="filter-help">改善のため、閲覧・検索・リンククリックの回数と選択されたタグを匿名で集計します。Cookieや利用者IDは使わず、検索語・IPアドレスはこの集計に保存しません。</p>
       </main>
@@ -93,5 +100,6 @@
     <script src="./config.js"></script>
     <script type="module" src="./app.js"></script>
     <script type="module" src="./share.js"></script>
+    <script type="module" src="./recent.js"></script>
   </body>
 </html>

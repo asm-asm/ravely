@@ -117,6 +117,24 @@ HTTP 400は入力不正、503は未設定/上流の利用上限、504は検索�
 対応値は `public/filters.js` をUIとサーバーで共有します。無効な値や重複指定は400となります。
 言語フィルターは複数の対応言語の中に選んだ言語が含まれるパターンを探します。価格・言語は購入時にRavelryで再確認してください。
 
+## Ravelryに新しく登録された編み図
+
+ページ下部に、Ravelryへ新しく登録された編み図を3件ずつ表示します（「もっと見る」で3件ずつ追加）。実装は `public/recent.js`。
+
+`GET /api/ravelry/recent-patterns` は `sort=created`（Ravelryへの登録日時の新しい順）で検索APIを呼びます。`sort=date` は月単位の公開日順で、公開予定（未来の日付）の編み図が先頭に並ぶため使っていません。登録が新しくても、公開日が古い編み図や公開日未設定の編み図が含まれることがあります。
+`sort` の値はAPIドキュメントに一覧がなく、「サイトの編み図検索と同じパラメータが使える」とだけ書かれています。`created` は実際のAPIで動作を確認した値です。あわせてサイトの「New to Ravelry」フィルター（`new-to-ravelry=yes`、直近約2か月の登録）を付けているため、並び替えが効かなくなっても対象は最近の登録分に限られます。Ravelryは未知の `sort` 値をエラーにせず、id の小さい順（古い順）で返すため、結果が id の小さい順に並んでいたら古い編み図を新着として出さず、502（`UPSTREAM_SORT_IGNORED`）を返してサーバーログに記録します。
+
+| クエリ | 既定 | 値 |
+| --- | --- | --- |
+| `page` | 1 | 1〜9999 |
+| `pageSize` | 20（画面は3） | 1〜50 |
+| `craft` | `knitting` | `knitting` / `crochet` / `all`（絞り込みなし） |
+| `free` | 0 | `1` で無料のみ（Ravelryの `availability=free`） |
+
+レスポンスは `{ patterns: [{ id, name, designer, url, photo, free }], page, hasNext }` です。成功時は `Cache-Control: public, s-maxage=1800, stale-while-revalidate=3600`、エラー時は `no-store` を返します。
+上流の8秒タイムアウトとその他の通信失敗は502、認証拒否は500（理由はサーバーログのみ）、429は503と `Retry-After`、認証情報未設定は503です。画像はRavelryのURLを直接表示し、保存・再配信はしません。
+認証情報は検索と同じ `RAVELRY_API_USERNAME` / `RAVELRY_API_PASSWORD` を使うため、追加の環境変数は不要です。表記は「データ提供：Ravelry」としていますが、Ravelry APIの利用条件（表記・画像・キャッシュ期間）は未確認です。
+
 ## GitHub Pages + Renderで公開
 
 ### 1. GitHubリポジトリ

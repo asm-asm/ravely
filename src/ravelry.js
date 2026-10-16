@@ -90,3 +90,61 @@ export async function searchPatterns({ query, page, pageSize, username, password
   return { items: data.patterns.map(p => mapPattern(details[p.id]?.id === p.id ? { ...p, ...details[p.id] } : p)), total, detailsWarning,
     hasNext: total === null ? data.patterns.length === pageSize : page * pageSize < total };
 }
+
+export const recentCrafts = ['knitting', 'crochet', 'all'];
+
+export function mapRecentPattern(pattern) {
+  return {
+    id: pattern.id,
+    name: typeof pattern.name === 'string' ? pattern.name : 'タイトルなし',
+    designer: typeof pattern.designer?.name === 'string' ? pattern.designer.name : '',
+    url: typeof pattern.permalink === 'string' && pattern.permalink
+      ? `https://www.ravelry.com/patterns/library/${encodeURIComponent(pattern.permalink)}` : null,
+    photo: imageUrl(pattern.first_photo?.medium_url) || imageUrl(pattern.first_photo?.small_url),
+    free: pattern.free === true,
+  };
+}
+
+// "Recent" means newest additions to Ravelry (sort=created). sort=date orders by the
+// month-granular publication date, which surfaces future pre-release dates first.
+// new-to-ravelry=yes is the on-site "New to Ravelry" filter (about the last two months),
+// so even if the undocumented sort stops working, results stay limited to recent additions.
+export async function recentPatterns({ page, pageSize, craft, free, username, password, fetchImpl }) {
+  const url = new URL('https://api.ravelry.com/patterns/search.json');
+  url.search = new URLSearchParams({ sort: 'created', 'new-to-ravelry': 'yes', page: String(page), page_size: String(pageSize) });
+  if (craft !== 'all') url.searchParams.set('craft', craft);
+  if (free) url.searchParams.set('availability', 'free');
+  let response;
+  try {
+    response = await fetchImpl(url, {
+      headers: { Accept: 'application/json', Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}` },
+      signal: AbortSignal.timeout(8000), redirect: 'error',
+    });
+  } catch (error) {
+    if (error.name === 'TimeoutError' || error.name === 'AbortError') throw new ApiError(502, 'UPSTREAM_TIMEOUT', 'Ravelryの応答に時間がかかっています。再度お試しください。');
+    throw new ApiError(502, 'UPSTREAM_ERROR', 'Ravelryとの接続に失敗しました。時間をおいて再度お試しください。');
+  }
+  if (response.status === 401 || response.status === 403) {
+    console.error(`Ravelry recent patterns: authentication rejected (HTTP ${response.status})`);
+    throw new ApiError(500, 'UPSTREAM_AUTH', '新着編み図を取得できませんでした。');
+  }
+  if (response.status === 429) {
+    const retry = Number(response.headers.get('retry-after'));
+    const error = new ApiError(503, 'UPSTREAM_RATE_LIMIT', 'Ravelryの利用上限に達しました。時間をおいて再度お試しください。');
+    error.retryAfter = Number.isSafeInteger(retry) && retry > 0 && retry <= 3600 ? retry : 60;
+    throw error;
+  }
+  if (!response.ok) throw new ApiError(502, 'UPSTREAM_ERROR', 'Ravelryから新着編み図を取得できませんでした。');
+  const data = await response.json().catch(() => null);
+  if (!Array.isArray(data?.patterns) || data.patterns.some(p => !p || typeof p !== 'object')) throw new ApiError(502, 'INVALID_UPSTREAM_RESPONSE', 'Ravelryの応答を読み取れませんでした。');
+  // sort=created is undocumented. Ravelry silently falls back to ascending IDs (oldest first)
+  // for unknown sorts, so treat ascending IDs as a broken sort rather than show old patterns as new.
+  const ids = data.patterns.map(p => p.id);
+  if (ids.length > 1 && ids.every(Number.isSafeInteger) && ids.every((id, i) => i === 0 || id > ids[i - 1])) {
+    console.error('Ravelry recent patterns: sort=created appears to be ignored (IDs returned in ascending order)');
+    throw new ApiError(502, 'UPSTREAM_SORT_IGNORED', '新着編み図を取得できませんでした。');
+  }
+  const lastPage = data.paginator?.last_page;
+  return { patterns: data.patterns.map(mapRecentPattern), page,
+    hasNext: Number.isSafeInteger(lastPage) ? page < lastPage : data.patterns.length === pageSize };
+}

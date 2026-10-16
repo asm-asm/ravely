@@ -12,7 +12,7 @@ if (!process.env.SITE_URL) throw new Error('SITE_URL must be the public frontend
 const html = siteMetadata(await readFile(new URL('../public/index.html', import.meta.url), 'utf8'), process.env.SITE_URL);
 await mkdir(destination, { recursive: true });
 // Allowlist keeps server files and environment files out of the Pages artifact.
-for (const name of ['app.js', 'styles.css', 'filters.js', 'share.js', 'analytics.js', 'icons.js', 'og.png']) {
+for (const name of ['app.js', 'styles.css', 'filters.js', 'share.js', 'analytics.js', 'icons.js', 'recent.js', 'og.png']) {
   await copyFile(new URL(`../public/${name}`, import.meta.url), new URL(name, destination));
 }
 await cp(new URL('../public/icons/', import.meta.url), new URL('icons/', destination), { recursive: true });

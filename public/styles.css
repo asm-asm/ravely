@@ -318,3 +318,33 @@ h1 > .icon, h2 > .icon { margin-right: 8px; }
   .filter-group[data-filter-group="category"], .filter-group[data-filter-group="weight"] { grid-column: 1 / -1; }
 }
 @media (forced-colors: active) { .icon { background: CanvasText; } .filter-chip[aria-pressed="true"] { outline: 2px solid Highlight; } }
+
+/* Newly registered patterns: compact rows on phones, a 3-column grid on wider screens. */
+.recent { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border); }
+.recent h2 { display: flex; align-items: center; margin: 0; font-size: 1.25rem; }
+.recent-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: 8px; }
+.recent-card { display: grid; grid-template-columns: 96px minmax(0, 1fr); min-width: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; color: inherit; text-decoration: none; box-shadow: 0 6px 16px rgba(30, 26, 22, 0.05); }
+.recent-image { width: 100%; height: 100%; min-height: 96px; aspect-ratio: 1; object-fit: cover; display: block; background: var(--accent); }
+.recent-image.image-placeholder { font-size: 0.75rem; gap: 4px; }
+.recent-image.image-placeholder .icon { width: 24px; height: 24px; flex-basis: 24px; }
+.recent-body { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 10px 12px; min-width: 0; }
+.recent-body h3 { margin: 0; font-size: 1rem; line-height: 1.4; }
+.recent-body p { margin: 0; color: var(--muted); font-size: 0.875rem; }
+.recent-skeleton .recent-image, .recent-skeleton .recent-body { background: var(--accent); animation: recent-pulse 1.4s ease-in-out infinite; }
+@keyframes recent-pulse { 50% { opacity: 0.5; } }
+@media (prefers-reduced-motion: reduce) { .recent-skeleton .recent-image, .recent-skeleton .recent-body { animation: none; } }
+.recent-message { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.recent-button { min-height: 44px; padding: 10px 20px; border: 1px solid var(--control-border); border-radius: 12px; background: var(--panel); color: var(--primary-strong); font-weight: 700; cursor: pointer; }
+#recentMore { display: block; margin: 16px auto 0; }
+#recentMore[hidden] { display: none; }
+#recentStatus:empty { display: none; }
+@media (min-width: 760px) {
+  .recent-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .recent-card { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
+  .recent-image { height: auto; aspect-ratio: 4 / 3; }
+  .recent-skeleton .recent-body { min-height: 72px; }
+}
+@media (hover: hover) {
+  a.recent-card:hover h3 { text-decoration: underline; }
+  .recent-button:enabled:hover { background: var(--accent); }
+}

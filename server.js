@@ -3,7 +3,7 @@ import cors from 'cors';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
-import { searchPatterns, normalizeQuery, translateQuery, ApiError } from './src/ravelry.js';
+import { searchPatterns, recentPatterns, recentCrafts, normalizeQuery, translateQuery, ApiError } from './src/ravelry.js';
 import { mockPatterns } from './src/mock.js';
 import { filterGroups } from './public/filters.js';
 import { analyticsRoutes } from './src/analytics.js';
@@ -67,6 +67,36 @@ export function createApp({ env = process.env, fetchImpl = globalThis.fetch } = 
       const upstreamFilters = featured ? { sort: 'projects', photo: 'yes' } : filters;
       return res.json({ ...metadata, ...await searchPatterns({ query: searchQuery, page, pageSize, username, password, fetchImpl, filters: upstreamFilters }) });
     } catch (error) {
+      if (error instanceof ApiError) return failure(error.status, error.code, error.message);
+      return failure(502, 'UPSTREAM_ERROR', 'Ravelryとの接続に失敗しました。時間をおいて再度お試しください。');
+    }
+  });
+  app.get('/api/ravelry/recent-patterns', async (req, res) => {
+    const failure = (status, code, error) => res.status(status).json({ error, code, patterns: [] });
+    const value = (key, fallback) => req.query[key] === undefined ? fallback : req.query[key];
+    const pageValue = value('page', '1');
+    const sizeValue = value('pageSize', '20');
+    const craft = value('craft', 'knitting');
+    const freeValue = value('free', '0');
+    if (typeof pageValue !== 'string' || !/^[1-9]\d{0,3}$/.test(pageValue)) return failure(400, 'INVALID_PAGE', 'ページは1〜9999の整数で指定してください。');
+    if (typeof sizeValue !== 'string' || !/^[1-9]\d?$/.test(sizeValue) || Number(sizeValue) > 50) return failure(400, 'INVALID_PAGE_SIZE', '件数は1〜50の整数で指定してください。');
+    if (typeof craft !== 'string' || !recentCrafts.includes(craft)) return failure(400, 'INVALID_CRAFT', '指定された編み方は利用できません。');
+    if (freeValue !== '0' && freeValue !== '1') return failure(400, 'INVALID_FREE', 'freeは0または1で指定してください。');
+    const page = Number(pageValue);
+    const pageSize = Number(sizeValue);
+    const free = freeValue === '1';
+    if (source === 'mock') {
+      const matches = mockPatterns.filter(item => (craft === 'all' || item.craft === craft) && (!free || item.free === true))
+        .map(item => ({ id: item.id, name: item.title, designer: item.designer, url: item.url, photo: item.image, free: item.free === true }));
+      return res.json({ patterns: matches.slice((page - 1) * pageSize, page * pageSize), page, hasNext: page * pageSize < matches.length, source });
+    }
+    if (!username || !password) return failure(503, 'API_NOT_CONFIGURED', '新着編み図を表示できません。管理者による設定が必要です。');
+    try {
+      const data = await recentPatterns({ page, pageSize, craft, free, username, password, fetchImpl });
+      res.set('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=3600');
+      return res.json({ ...data, source });
+    } catch (error) {
+      if (error.retryAfter) res.set('Retry-After', String(error.retryAfter));
       if (error instanceof ApiError) return failure(error.status, error.code, error.message);
       return failure(502, 'UPSTREAM_ERROR', 'Ravelryとの接続に失敗しました。時間をおいて再度お試しください。');
     }
